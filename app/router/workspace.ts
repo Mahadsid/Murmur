@@ -1,24 +1,27 @@
 import { KindeOrganization, KindeUser } from "@kinde-oss/kinde-auth-nextjs";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 //import { os } from "@orpc/server";
-import {z} from 'zod'
+import { z } from 'zod'
 import { base } from "../middlewares/base";
 import { requiredAuthMiddleware } from "../middlewares/auth";
 import { requiredWorkspaceMiddleware } from "../middlewares/workspace";
 import { workspaceSchema } from "../schemas/workspace";
 import { Organizations, Users, init } from "@kinde/management-api-js";
- 
+import { standardSecurityMiddleware } from "../middlewares/arcjet/standard";
+import { heavyWriteSecurityMiddleware } from "../middlewares/arcjet/heavy-write";
+
+//++++++++++++++++++++++++++++++++++++ LIST/GET WORKSPACE ROUTE ++++++++++++++++++++++++++++++++++++ 
 // to make the route we can attach our middleware here and it can work, like we attack base middleware here. previously we just building route with os from orpc but we can define middlewares and attach them here.
 export const listWorkspaces = base
     .use(requiredAuthMiddleware)
     .use(requiredWorkspaceMiddleware)
     .route({
-    method: "GET",
-    path: "/workspace",
-    summary: "list all workspaces",
-    tags: ["workspace"],
-    //input is what user will pass, but this is GET req and we want to fetch data so we dont user to pass anything so we void it.
-}).input(z.void())
+        method: "GET",
+        path: "/workspace",
+        summary: "list all workspaces",
+        tags: ["workspace"],
+        //input is what user will pass, but this is GET req and we want to fetch data so we dont user to pass anything so we void it.
+    }).input(z.void())
     // output is what handler will return. so in handler we write query logic. and what shape we rturn is passed in output,
     .output(z.object({
         workspaces: z.array(
@@ -32,7 +35,7 @@ export const listWorkspaces = base
         currentWorkspace: z.custom<KindeOrganization<unknown>>(),
     })
     )
-    .handler(async ({context, errors}) => {
+    .handler(async ({ context, errors }) => {
         const { getUserOrganizations } = getKindeServerSession();
 
         const organizations = await getUserOrganizations();
@@ -52,25 +55,28 @@ export const listWorkspaces = base
         };
     });
 
+//++++++++++++++++++++++++++++++++++++ CREATE/POST WORKSPACE ROUTE ++++++++++++++++++++++++++++++++++++
 
-    export const createWorkspace = base
+export const createWorkspace = base
     .use(requiredAuthMiddleware)
     .use(requiredWorkspaceMiddleware)
+    .use(standardSecurityMiddleware)
+    .use(heavyWriteSecurityMiddleware)
     .route({
-    method: "POST",
-    path: "/workspace",
-    summary: "Create a new workspace",
-    tags: ["workspace"],
-    //input is what user will pass, this is a POST req and we want to create a workspace from data we getfrom user. so we give our input schema we created.
-}).input(workspaceSchema)
+        method: "POST",
+        path: "/workspace",
+        summary: "Create a new workspace",
+        tags: ["workspace"],
+        //input is what user will pass, this is a POST req and we want to create a workspace from data we getfrom user. so we give our input schema we created.
+    }).input(workspaceSchema)
     // output is what handler will return. so in handler we write query logic. and what shape we rturn is passed in output,
-        .output(
-            z.object({
-                orgCode: z.string(),
-                workspaceName: z.string(),
-            })
-        )
-    .handler(async ({context, errors, input}) => {
+    .output(
+        z.object({
+            orgCode: z.string(),
+            workspaceName: z.string(),
+        })
+    )
+    .handler(async ({ context, errors, input }) => {
         // USING KINDE API FOR CREATION of workspace, https://docs.kinde.com/kinde-apis/management/#tag/api-keys , this url is original apis, but easy way to do this using abstraction here checkout, install it and use it, here: https://github.com/kinde-oss/management-api-js
         // **NOTE TO SELF** WITH above also need to make m2m machine application in kinde give is API scope and authorize it. so checkout Youtube if not understanding
 
@@ -83,9 +89,9 @@ export const listWorkspaces = base
         try {
             data = await Organizations.createOrganization({
                 requestBody: {
-                   name: input.name
-               },
-           }) 
+                    name: input.name
+                },
+            })
         } catch {
             throw errors.FORBIDDEN();
         }
