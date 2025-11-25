@@ -10,12 +10,18 @@ import { Plus } from "lucide-react";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { workspaceSchema } from "@/app/schemas/workspace";
+import { workspaceSchema, WorkspaceSchemaType } from "@/app/schemas/workspace";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { orpc } from "@/lib/orpc";
+import { toast } from "sonner";
 
 
 export function CreateworkSpace() {
     // Since Dialog state can be managed by shadcnUI or by ourself, here we manage it ouself so we create a state, plus to work it on Dialog pass open, and onopenChange Tag
     const [open, setOpen] = useState(false);
+
+    // TO revalidate the data after mutuation/ creation or after calling a method (POST, PUT).
+    const queryClient = useQueryClient();
 
 // 1. Define your form,,,, form from shadcnUI: https://ui.shadcn.com/docs/components/form
     const form = useForm({
@@ -23,13 +29,35 @@ export function CreateworkSpace() {
         defaultValues: {
             name: ""
         }
-  })
+    })
+    
+    //Setting up mutation(calling kinde, or POST-ing) for creatring an organization-logic we writt on router/workspace.ts
+    const createworkSpaceMutation = useMutation(
+        orpc.workspace.create.mutationOptions({
+            // Here we can listen to events of mutation
+            onSuccess: (newWorkspace) => {
+                toast.success(`Workspace ${newWorkspace.workspaceName} created successfully.`);
+
+                // After toast we want to revalidate the data meaning when new workspace is created we want to fetch again and show it in sidebar.
+                queryClient.invalidateQueries({
+                    queryKey: orpc.workspace.list.queryKey(),
+                });
+                // step 2: rest the form, close dialog
+                form.reset();
+                setOpen(false);
+            },
+            onError: () => {
+               toast.error("Failed to create workspace, try again!") 
+            }
+        })
+    )
 
   // 2. Define a submit handler.
-  function onSubmit() {
+  function onSubmit(values: WorkspaceSchemaType) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
-    console.log("values")
+      // console.log("values")
+      createworkSpaceMutation.mutate(values);
   }
 
 
@@ -70,7 +98,9 @@ export function CreateworkSpace() {
                                 <FormMessage />
                             </FormItem>
                         )} />
-                        <Button type="submit">Create Workspace</Button>
+                        <Button disabled={createworkSpaceMutation.isPending} type="submit">
+                            {createworkSpaceMutation.isPending ? 'Creating...' : 'Create Workspace'}
+                        </Button>
                     </form>
                 </Form>
             </DialogContent>

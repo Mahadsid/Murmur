@@ -1,8 +1,14 @@
+// https://orpc.unnoq.com/docs/adapters/next   IMPORT FOR OPTIMIZE SSR (4.th File)
+import "@/lib/orpc.server" //THis is used for pre-rendring SSR.
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { AuthProvider } from "@/components/ui/AuthProvider";
+import { Providers } from "@/lib/providers";
+import { Toaster } from "@/components/ui/sonner";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,7 +42,11 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            {/* Providers of tanstack query using orpc more file in lib folder */}
+            <Providers> 
+              {children}
+            </Providers>
+            <Toaster closeButton position="top-center"/>
           </ThemeProvider>
       </body>
     </html>
