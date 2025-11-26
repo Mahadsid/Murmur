@@ -1,6 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📢 Murmur — Smart Team Messaging, Fueled by AI
 
-## Getting Started
+🚧 **Currently Under Active Development** 🚧  
+
+Murmur is a next-generation **team messaging platform** built for clarity, speed, and intelligence.
+
+✨ Unleash seamless collaboration  
+🤖 AI-powered responses & workflow automations  
+⚡ Lightning-fast experience for modern, high-performing teams  
+
+---
+
+## ✨ Features
+
+### 💬 Real-Time Team Messaging
+Fast, clean, intuitive communication for individuals and teams.
+
+### 🤖 AI-Enhanced Collaboration
+Smart recommendations, automatic replies, and workflow automations integrated directly into chat.
+
+### 🚀 High-Performance Architecture
+Built on a modern stack optimized for speed, scalability, and developer happiness.
+
+### 🔐 Secure & Reliable
+Arcjet-powered rate protection and modern authentication ensure a safe collaboration space.
+
+---
+
+## 🧩 Tech Stack
+
+Murmur is crafted using a powerful, future-ready stack:
+
+| Layer | Technologies |
+|-------|--------------|
+| **Frontend** | Next.js, Motion UI |
+| **Backend** | oRPC, Prisma |
+| **Database** | NeonDB (Serverless Postgres) |
+| **AI / Utilities** | Kinde Auth, Arcjet Security |
+| **Deployment** | Vercel |
+
+---
+
+## 🛠 Getting Started
 
 First, run the development server:
 
