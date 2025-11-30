@@ -4,9 +4,9 @@
 
 Murmur is a next-generation **team messaging platform** built for clarity, speed, and intelligence.
 
-✨ Unleash seamless collaboration  
-🤖 AI-powered responses & workflow automations  
-⚡ Lightning-fast experience for modern, high-performing teams  
+✨ Unleash seamless collaboration.  
+🤖 AI-powered responses & workflow automations.  
+⚡ Lightning-fast experience for modern, high-performing teams.  
 
 ---
 
