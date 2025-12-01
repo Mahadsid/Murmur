@@ -8,6 +8,7 @@ import { AnimatedGroup } from '@/components/ui/animated-group'
 import { HeroHeader } from './header'
 import BackgroundImage from '@/public/background4.jpg'
 import SS1 from '@/public/ss1.png'
+import Learnova from '@/public/Learnova-1.jpeg'
 import SS2 from '@/public/ss2.png'
 import Arcjet from '@/public/companies/Arcjet.png'
 import Kinde from '@/public/companies/kinde.png'
@@ -185,7 +186,7 @@ export default function HeroSection() {
                                 <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg shadow-zinc-950/15 ring-1">
                                     <Image
                                         className="bg-background aspect-15/8 relative hidden rounded-2xl dark:block object-contain object-top"
-                                        src={SS1}
+                                        src={Learnova}
                                         alt="app screen"
                                         width="2700"
                                         height="1440"
