@@ -7,9 +7,7 @@ import { requiredWorkspaceMiddleware } from "../middlewares/workspace";
 import { ChannelNameSchema } from "../schemas/channel";
 import prisma from "@/lib/db";
 import { Channel } from "@/lib/generated/prisma/client";
-import { error } from "console";
 import { init, organization_user, Organizations } from "@kinde/management-api-js";
-import { channel } from "diagnostics_channel";
 import { KindeOrganization } from "@kinde-oss/kinde-auth-nextjs";
 
 export const createChannel = base
