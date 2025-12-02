@@ -4,20 +4,26 @@
 
 
 import { createChannel, listChannels } from "./channel";
+import { createMessage } from "./message";
 import { createWorkspace, listWorkspaces } from "./workspace";
 
 
 
 //Make a standard function with name router, 
 export const router = {
-    //first route, for our workspace and in this we can declare/define our procedures (like getItems, getWorkspaces, createWorkspaces etc) so we create an new file workspace.ts and define functionality over there. 
+  //first route, for our workspace and in this we can declare/define our procedures (like getItems, getWorkspaces, createWorkspaces etc) so we create an new file workspace.ts and define functionality over there. 
+ //workspace routes
   workspace: {
     list: listWorkspaces,
     create: createWorkspace,
   },
-
+  //channel routes
   channel: {
     create: createChannel,
     list: listChannels,
-  }
+  },
+  //message routes
+  message: {
+    create: createMessage,
+  },
 }
