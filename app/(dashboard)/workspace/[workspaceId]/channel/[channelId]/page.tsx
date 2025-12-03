@@ -1,8 +1,14 @@
+"use client";
+import { useParams } from 'next/navigation';
 import { ChannelHeader } from './_components/ChannelHeader';
 import { MessageInputForm } from './_components/message/MessageInputForm';
 import { MessageList } from './_components/MessageList';
 
 const ChannelPageMain = () => {
+    // This is to get the dynamic value, from the route, which we made from folder [channelId] NAME should match exactly both-where.
+    const { channelId } = useParams<{ channelId: string }>();
+
+
     return (
         <div className='flex h-screen w-full'>
             {/* Main channel */}
@@ -15,7 +21,7 @@ const ChannelPageMain = () => {
                 </div>
                 {/* Message fixed Input */}
                 <div className='border-t bg-background p-4'>
-                    <MessageInputForm />
+                    <MessageInputForm channelId={channelId} />
                 </div>
             </div>
         </div>
