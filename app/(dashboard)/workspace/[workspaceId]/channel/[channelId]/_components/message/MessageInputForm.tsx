@@ -5,7 +5,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@/component
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { MessageComposer } from "./MessageComposer"
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { orpc } from "@/lib/orpc";
 import { toast } from "sonner";
 
@@ -14,7 +14,10 @@ interface iAppProps {
     channelId: string
 }
 
-export function MessageInputForm({channelId}:iAppProps) {
+export function MessageInputForm({ channelId }: iAppProps) {
+    
+    // TO revalidate again and render new message after creation we need to revalidate query
+    const queryClient = useQueryClient();
 
     const form = useForm({
         resolver: zodResolver(createMessageSchema),
@@ -27,6 +30,10 @@ export function MessageInputForm({channelId}:iAppProps) {
     const createMessageMutation = useMutation(
         orpc.message.create.mutationOptions({
             onSuccess: () => {
+                // TO revalidate again and render new message after creation we need to revalidate query
+                queryClient.invalidateQueries({
+                    queryKey: orpc.message.list.key()
+                })
                 return toast.success("message created successfully")
             },
             onError: () => {
@@ -48,7 +55,7 @@ export function MessageInputForm({channelId}:iAppProps) {
                     render={({ field }) => (
                         <FormItem>
                             <FormControl>
-                                <MessageComposer value={field.value} onChange={field.onChange} onSubmit={() => onSubmit(form.getValues())} />
+                                <MessageComposer value={field.value} onChange={field.onChange} onSubmit={() => onSubmit(form.getValues())} isSubmitting={createMessageMutation.isPending} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>

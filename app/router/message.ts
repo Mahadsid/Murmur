@@ -8,6 +8,7 @@ import prisma from "@/lib/db";
 import { createMessageSchema } from "../schemas/message";
 import { getAvatar } from "@/lib/get-avatar";
 import { Message } from "@/lib/generated/prisma/client";
+import { readSecurityMiddleware } from "../middlewares/arcjet/read";
 
 
 export const createMessage = base
@@ -51,3 +52,46 @@ export const createMessage = base
             ...created,
         }
     });
+
+
+// Procedure for geting all messages from database
+
+
+export const listMessages = base
+    .use(requiredAuthMiddleware)
+    .use(requiredWorkspaceMiddleware)
+    .use(standardSecurityMiddleware)
+    .use(readSecurityMiddleware)
+    .route({
+        method: "GET",
+        path: "/messages",
+        summary: "List all messages",
+        tags: ["Messages"],
+    })
+    .input(z.object({
+        channelId: z.string(),
+    }))
+    .output(z.array(z.custom<Message>()))
+    .handler(async ({input, errors, context}) => {
+        // 1.Security checkpoint: check if channel belongs to user organizayion/workspace.
+        const channel = await prisma.channel.findFirst({
+            where: {
+                id: input.channelId,
+                workspaceId: context.workspace.orgCode,
+            },
+        });
+        if (!channel) {  //defense 
+            throw errors.FORBIDDEN();
+        }
+
+        // 2.get messages
+        const data = await prisma.message.findMany({
+            where: {
+                channelId: input.channelId,
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+        return data;
+    })
