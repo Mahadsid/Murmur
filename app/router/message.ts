@@ -70,9 +70,15 @@ export const listMessages = base
     })
     .input(z.object({
         channelId: z.string(),
+        //implementing cursor-pagination
+        limit: z.number().min(1).max(100).optional(),
+        cursor: z.string().optional(),
     }))
-    .output(z.array(z.custom<Message>()))
-    .handler(async ({input, errors, context}) => {
+    .output(z.object({
+        items: z.array(z.custom<Message>()),
+        nextCursor: z.string().optional(),
+    }))
+    .handler(async ({ input, errors, context }) => {
         // 1.Security checkpoint: check if channel belongs to user organizayion/workspace.
         const channel = await prisma.channel.findFirst({
             where: {
@@ -84,14 +90,34 @@ export const listMessages = base
             throw errors.FORBIDDEN();
         }
 
-        // 2.get messages
-        const data = await prisma.message.findMany({
+        // 2.get messages its simple no pagination.
+        // const data = await prisma.message.findMany({
+        //     where: {
+        //         channelId: input.channelId,
+        //     },
+        //     orderBy: {
+        //         createdAt: "desc",
+        //     },
+        // });
+        // return data;
+
+        // 2.get data with pagination.
+
+        const limit = input.limit ?? 30;
+        const messages = await prisma.message.findMany({
             where: {
                 channelId: input.channelId,
             },
-            orderBy: {
-                createdAt: "desc",
-            },
+            ...(input.cursor ? {
+                cursor: { id: input.cursor },
+                skip: 1,
+            } : {}),
+            take: limit,
+            orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         });
-        return data;
-    })
+        const nextCursor = messages.length === limit ? messages[messages.length - 1].id : undefined;
+        return {
+            items: messages,
+            nextCursor,
+        };
+    });
