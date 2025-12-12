@@ -34,7 +34,14 @@ export function MessageItem({message} : iAppProps) {
                 </div>
                 {/* Since we store messages in database by stringyfy the JSON so when retreiving the message in below code it shows like "tye:json""content: hiais" withis code But we want to deisplay message only, so we make a new component and inside that we covert sting -> JSON and take our content and render it. CHECKOUT SafeContent.tsx & lib/json-to-html.ts*/}
                 {/* <p className="text-sm break-word max-w-none marker:text-primary">{ message.content }</p> */}
-                <SafeContent content={JSON.parse(message.content)} classname="text-sm break-words prose dark:prose-invert max-w-none marker:text-primary"/>
+                <SafeContent content={JSON.parse(message.content)} classname="text-sm break-words prose dark:prose-invert max-w-none marker:text-primary" />
+                
+                {/* For rendering UPLOADED IMAGE IN MESSAGE BOX/VIEW AFTER UPLOADING FROM RICH-TEXT-EDITOR */}
+                {message.imageUrl && (
+                    <div className="mt-2">
+                        <Image src={message.imageUrl} alt="Message Attachment" width={512} height={512} className="rounded-md max-h-[320px] w-auto object-contain"/>
+                    </div>
+                )}
             </div>
         </div>
 
