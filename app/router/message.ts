@@ -28,7 +28,7 @@ export const createMessage = base
         // Secqurity-CHECK{IMPORTANT} verift the channel belongs to the user's organization.
         const channel = await prisma.channel.findFirst({
             where: {
-                id: input.channeId,
+                id: input.channelId,
                 workspaceId: context.workspace.orgCode,
             }
         });
@@ -40,7 +40,7 @@ export const createMessage = base
             data: {
                 content: input.content,
                 imageUrl: input.imageUrl,
-                channelId: input.channeId,
+                channelId: input.channelId,
                 authorId: context.user.id,
                 authorEmail: context.user.email!,
                 authorName: context.user.given_name ?? "Guest User",
