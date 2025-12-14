@@ -5,7 +5,8 @@ import { orpc } from "@/lib/orpc"
 import { useParams } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowDown } from "lucide-react"
+import { ArrowDown, Loader } from "lucide-react"
+import { EmptyState } from "@/components/general/EmptyState"
 
 // const messageDemo = [
 //     {
@@ -25,7 +26,6 @@ export function MessageList() {
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const bottomRef = useRef<HTMLDivElement | null>(null);
     const [isAtBottom, setIsAtBottom] = useState(false);
-    const [newMessages, setNewMessages] = useState(false);
     const lastItemIdRef = useRef<string | undefined>(undefined);
     
     // getting data on client side (UPDATE : SEE NEW CODE FOR INFINTE SCROLL/PAGINATION)
@@ -43,6 +43,7 @@ export function MessageList() {
             cursor: pageParam,
             limit: 10,
         }),
+        queryKey: ["message.list", channelId],
         initialPageParam: undefined,
         getNextPageParam: (lastPage) => lastPage.nextCursor,
         // select is used for showing in reverse order,
@@ -64,12 +65,59 @@ export function MessageList() {
         if (!hasInitialScrolled && data?.pages.length) {
             const el = scrollRef.current;
             if (el) {
-                el.scrollTop = el.scrollHeight;
+                //el.scrollTop = el.scrollHeight;
+                bottomRef.current?.scrollIntoView({ block: "end" });
                 setHasInitialScrolled(true);
                 setIsAtBottom(true);
             }
         }
     }, [hasInitialScrolled, data?.pages.length]);
+
+    //keep view pinned to bottom on late content growth ex new messages with images.
+
+    useEffect(() => {
+        const el = scrollRef.current;
+        if (!el) {
+            return;
+        }
+        const scrollToBottomIfNeeded = () => {
+            if (isAtBottom || !hasInitialScrolled) {
+            requestAnimationFrame(() => {
+                bottomRef.current?.scrollIntoView({ block: "end" });
+            });
+        }
+        }
+        const onImageLoad = (e: Event) => {
+            if (e.target instanceof HTMLImageElement) {
+                scrollToBottomIfNeeded();
+            }
+        };
+        el.addEventListener("load", onImageLoad, true);
+
+        // ResizeObserver watches for size changes in the container
+        const resizeObserver = new ResizeObserver(() => {
+            scrollToBottomIfNeeded();
+        }); 
+        resizeObserver.observe(el);
+
+        //MutationObserver watches for DOM changes e.g images,loading, content, updates.
+        const mutationObserver = new MutationObserver(() => {
+            scrollToBottomIfNeeded();
+        });
+        mutationObserver.observe(el, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            characterData: true,
+        });
+
+        //cleanup function to prevent memory leaks and prevent stale events
+        return () => {
+            resizeObserver.disconnect();
+            el.removeEventListener('load', onImageLoad, true);
+            mutationObserver.disconnect();
+        };
+    }, [isAtBottom, hasInitialScrolled]);
 
     const isNearBottom = (el: HTMLDivElement) => el.scrollHeight - el.scrollTop - el.clientHeight <= 80;
     
@@ -92,6 +140,9 @@ export function MessageList() {
         return data?.pages.flatMap((p) => p.items) ?? []
     }, [data]);
 
+    //For checking if some channel dont have messages then we can use this and display empty state.
+    const isEmpty = !isLoading && !error && items.length === 0;
+
     useEffect(() => {
         if (!items.length) return;
         const lastId = items[items.length - 1].id;
@@ -103,10 +154,8 @@ export function MessageList() {
                 requestAnimationFrame(() => {
                     el.scrollTop = el.scrollHeight;
                 });
-                setNewMessages(false);
+                
                 setIsAtBottom(true);
-            } else {
-                setNewMessages(true);
             }
         }
         lastItemIdRef.current = lastId;
@@ -115,20 +164,43 @@ export function MessageList() {
     const scrollToBottom = () => {
         const el = scrollRef.current;
         if (!el) return;
-        el.scrollTop = el.scrollHeight;
-        setNewMessages(false);
+        bottomRef.current?.scrollIntoView({ block: "end" });
         setIsAtBottom(true);
     }
 
     return (
         <div className="relative h-full">
             <div className="h-full overflow-y-auto px-4 flex flex-col space-y-1" ref={scrollRef} onScroll={handleScroll}>
-                {items?.map((message) => (
+                {
+                isEmpty ?
+                (<div className="flex h-full pt-4">
+                    <EmptyState title="No messages yet🙄" description="Don't wait, send the first message and start the convo📟" buttonText="Send a message" href="#" />
+                </div>)
+                :
+                (items?.map((message) => (
                     <MessageItem key={message.id} message={message} />
-                ))}
+                )))
+            }
                 <div ref={bottomRef}></div>
             </div>
-            {newMessages && !isAtBottom ? <Button type="button" className="absolute bottom-4 right-8 rounded-full" onClick={scrollToBottom}>New Messages <ArrowDown className="size-4 mr-1"/></Button> : null}
+
+            {/* FOR DISPLAYING LIKE LOADER FOR FETCHING DATA WHEN SCROLL TOP */}
+            {isFetchingNextPage && (
+                <div className="pointer-events-none absolute top-0 left-0 right-0 z-20 flex items-center justify-center py-2">
+                    <div className="flex items-center gap-2 rounded-md bg-gradient-to-b from-white/80 to-transparent dark:from-neutral-900/80 backdrop-blur px-3 py-1">
+                        <Loader className="size-4 animate-spin text-muted-foreground" />
+                        <span>Loading...</span>
+                    </div>
+                </div>
+            )}
+            
+            {!isAtBottom && (
+                <Button type="button" size="sm" className="absolute bottom-4 right-5 z-20 size-10 rounded-full hover:shadow-xl transition-all duration-200" onClick={scrollToBottom}>
+                    <ArrowDown className="size-4" />
+                </Button>
+            )}
+
+            {/* {newMessages && !isAtBottom ? <Button type="button" className="absolute bottom-4 right-8 rounded-full" onClick={scrollToBottom}>New Messages <ArrowDown className="size-4 mr-1"/></Button> : null} */}
         </div>
     )
 }
