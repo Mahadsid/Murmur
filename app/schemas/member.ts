@@ -1,9 +1,10 @@
 // this is the zod schema for the form for inviting the members, checkout InviteMember.tsx
 
-import z, { email } from "zod";
+import z from "zod";
 
 export const inviteMemberSchema = z.object({
     name: z.string().min(3).max(50),
     email: z.email(),
 })
 export type InviteMemberSchemaType = z.infer<typeof inviteMemberSchema>;
+ 

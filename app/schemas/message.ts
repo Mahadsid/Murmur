@@ -8,3 +8,11 @@ export const createMessageSchema = z.object({
 });
 
 export type CreateMessageSchemaType = z.infer<typeof createMessageSchema>;
+
+
+//schema for updating the messages
+export const updateMessageSchema = z.object({
+    messageId: z.string(),
+    content: z.string(),
+});
+export type UpdateMessageSchemaType = z.infer<typeof updateMessageSchema>;
