@@ -1,5 +1,5 @@
 "use client"
-import { useInfiniteQuery } from "@tanstack/react-query"
+import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query"
 import { MessageItem } from "./message/MessageItem"
 import { orpc } from "@/lib/orpc"
 import { useParams } from "next/navigation"
@@ -59,6 +59,9 @@ export function MessageList() {
         staleTime: 30_000,
         refetchOnWindowFocus: false,
     });
+
+    //to get user but more specific reason to get user is to fetch user id so we can sent it forward so that we can use it to match current-user-id in MessageItem.tsx (specifically for EditMessage.tsx) so that user can edit only its own messsages and not sombody else.
+    const {data: {user} } = useSuspenseQuery(orpc.workspace.list.queryOptions());
 
     // To implement when page load start at bottom, then scroll up, so to alter the standard behaviour of web browser.
     useEffect(() => {
@@ -178,7 +181,7 @@ export function MessageList() {
                 </div>)
                 :
                 (items?.map((message) => (
-                    <MessageItem key={message.id} message={message} />
+                    <MessageItem key={message.id} message={message} currentUserId={ user.id } />
                 )))
             }
                 <div ref={bottomRef}></div>
