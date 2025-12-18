@@ -1,19 +1,37 @@
 import { SafeContent } from "@/components/rich-text-editor/SafeContent";
-import { Message } from "@/lib/generated/prisma/client";
 import { getAvatar } from "@/lib/get-avatar";
 import Image from "next/image";
 import { MessageHoverToolbar } from "../toolbar";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { EditMessage } from "../toolbar/EditMessage";
+import { MessageListItem } from "@/lib/types";
+import { MessagesSquare } from "lucide-react";
+import { useThread } from "@/providers/ThreadProvider";
+import { orpc } from "@/lib/orpc";
+import { useQueryClient } from "@tanstack/react-query";
 
 
 interface iAppProps {
-    message: Message;
+    message: MessageListItem;
     currentUserId: string;
 }
 
-export function MessageItem({ message,currentUserId }: iAppProps) {
+export function MessageItem({ message, currentUserId }: iAppProps) {
     const [isEditing, setIsEditing] = useState(false);
+    const { openThread } = useThread();
+    const queryClient = useQueryClient();
+
+    //prefetching thread query on hover, since user can click to see replies so why not prefetch the replies when the user hover over the view replies.
+    const prefetchThread = useCallback(() => {
+        const options = orpc.message.thread.list.queryOptions({
+            input: {
+                messageId: message.id,
+            }
+        });
+        queryClient.prefetchQuery({ ...options, staleTime: 60_000 })
+            .catch(() => { })
+    }, [message.id, queryClient]);
+
     return (
         <div className="flex space-x-3 relative p-3 rounded-lg group hover:bg-muted/50">
             <Image src={getAvatar(message.authorAvatar, message.authorEmail)} alt="User Avatar" width={32} height={32} className="size-8 rounded-lg" />
@@ -39,7 +57,7 @@ export function MessageItem({ message,currentUserId }: iAppProps) {
                 {/* UPDATE: MESSAGE EDITING CODE SO PUT THEM IN TERNIARY */}
                 {
                     isEditing ?
-                        (<EditMessage message={message} onCancel={() => setIsEditing(false)} onSave={() => setIsEditing(false)}/>)
+                        (<EditMessage message={message} onCancel={() => setIsEditing(false)} onSave={() => setIsEditing(false)} />)
                         :
                         (<>
                             {/* Since we store messages in database by stringyfy the JSON so when retreiving the message in below code it shows like "tye:json""content: hiais" withis code But we want to deisplay message only, so we make a new component and inside that we covert sting -> JSON and take our content and render it. CHECKOUT SafeContent.tsx & lib/json-to-html.ts*/}
@@ -52,11 +70,22 @@ export function MessageItem({ message,currentUserId }: iAppProps) {
                                     <Image src={message.imageUrl} alt="Message Attachment" width={512} height={512} className="rounded-md max-h-[320px] w-auto object-contain" />
                                 </div>
                             )}
+                            {message.repliesCount > 0 && (
+                                <button type="button" className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border cursor-pointer" onClick={() => openThread(message.id)}
+                                    onMouseEnter={prefetchThread}
+                                    onFocus={prefetchThread}
+                                >
+                                    <MessagesSquare className="size-3.5" />
+                                    <span>{message.repliesCount}{" "}</span>
+                                    <span>{message.repliesCount === 1 ? "reply" : "replies"}</span>
+                                    <span className="opacity-0 group-hover:opacity-100 transition-opacity">View Thread</span>
+                                </button>
+                            )}
                         </>)
                 }
             </div>
             {/* message.authorId ===    so that only user can edit its own message and not any body else message, NOTE/IMPORTANT CHECK MESSAGELIST.TSX how did we get data then specifically user and pass its id. */}
-            <MessageHoverToolbar messageId={message.id} canEdit={message.authorId === currentUserId} onEdit={() => setIsEditing(true)}/>
+            <MessageHoverToolbar messageId={message.id} canEdit={message.authorId === currentUserId} onEdit={() => setIsEditing(true)} />
         </div>
     );
 }

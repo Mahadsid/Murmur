@@ -9,7 +9,12 @@ import { createMessageSchema, updateMessageSchema } from "../schemas/message";
 import { getAvatar } from "@/lib/get-avatar";
 import { Message } from "@/lib/generated/prisma/client";
 import { readSecurityMiddleware } from "../middlewares/arcjet/read";
+import { MessageListItem } from "@/lib/types";
 
+//to render reply count we extend Message  BCZ THIS IS USED IN MESSAGELIST.TSX ALSO SO WE MAKE TYPES.TS FILE IN LIB FOLDER AND EXPORT IT FROM THERE.
+// type MessageListItem = Message & {
+//     repliesCount: number;
+// };
 
 export const createMessage = base
     .use(requiredAuthMiddleware)
@@ -36,6 +41,22 @@ export const createMessage = base
             throw errors.FORBIDDEN();
         }
 
+        // If this is a thread reply, validate the parent message
+        if (input.threadId) {
+            const parentMessage = await prisma.message.findFirst({
+                where: {
+                    id: input.threadId,
+                    channel: {
+                        workspaceId: context.workspace.orgCode,
+                    },
+                },
+            });
+            if (!parentMessage || parentMessage.channelId !== input.channelId || parentMessage.threadId !== null) {
+                throw errors.BAD_REQUEST();
+            }
+        }
+
+
         const created = await prisma.message.create({
             data: {
                 content: input.content,
@@ -46,6 +67,7 @@ export const createMessage = base
                 authorName: context.user.given_name ?? "Guest User",
                 authorAvatar: getAvatar(context.user.picture, context.user.email!
                 ),
+                threadId: input.threadId,
             }
         });
         return {
@@ -55,8 +77,6 @@ export const createMessage = base
 
 
 // Procedure for geting all messages from database
-
-
 export const listMessages = base
     .use(requiredAuthMiddleware)
     .use(requiredWorkspaceMiddleware)
@@ -75,7 +95,7 @@ export const listMessages = base
         cursor: z.string().optional(),
     }))
     .output(z.object({
-        items: z.array(z.custom<Message>()),
+        items: z.array(z.custom<MessageListItem>()), //To get replies count we change the ouput type
         nextCursor: z.string().optional(),
     }))
     .handler(async ({ input, errors, context }) => {
@@ -107,6 +127,7 @@ export const listMessages = base
         const messages = await prisma.message.findMany({
             where: {
                 channelId: input.channelId,
+                threadId: null,
             },
             ...(input.cursor ? {
                 cursor: { id: input.cursor },
@@ -114,10 +135,31 @@ export const listMessages = base
             } : {}),
             take: limit,
             orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+            //To get replies count
+            include: {
+                _count: {select: {replies: true}}
+            }
         });
+
+        //now to reply we make an array including all objects
+        const items: MessageListItem[] = messages.map((m) => ({
+            id: m.id,
+            content: m.content,
+            imageUrl: m.imageUrl,
+            createdAt: m.createdAt,
+            updatedAt: m.updatedAt,
+            authorAvatar: m.authorAvatar,
+            authorEmail: m.authorEmail,
+            authorId: m.authorId,
+            authorName: m.authorName,
+            channelId: m.channelId,
+            threadId: m.threadId,
+            repliesCount: m._count.replies,
+        }))
+
         const nextCursor = messages.length === limit ? messages[messages.length - 1].id : undefined;
         return {
-            items: messages,
+            items: items,
             nextCursor,
         };
     });
@@ -172,4 +214,62 @@ export const listMessages = base
             canEdit: updated.authorId === context.user.id, //so only user can edit their own messages and cannot change other user messages.
         }
 
+    });
+
+//procedure for getting thread/reply messages
+export const listThreadReplies = base
+    .use(requiredAuthMiddleware)
+    .use(requiredWorkspaceMiddleware)
+    .use(standardSecurityMiddleware)
+    .use(readSecurityMiddleware)
+    .route({
+        method: "GET",
+        path: "/messages/:messageId/thread",
+        summary: "List replies in a thread",
+        tags: ["Messages"],
+    })
+    .input(z.object({
+        messageId: z.string(),
+    }))
+    .output(z.object({
+        parent: z.custom<Message>(),
+        messages: z.array(z.custom<Message>()),
+    }))
+    .handler(async ({ input, errors, context }) => {
+        // 1.Find the current message or message on which click is done to see its replies.
+        const parentRow = await prisma.message.findFirst({
+            where: {
+                id: input.messageId,
+                channel: {
+                    workspaceId: context.workspace.orgCode,
+                }
+            }
+        });
+        //defense
+        if (!parentRow) {
+            throw errors.NOT_FOUND();
+        }
+
+        //fetch all thread replies
+        const replies = await prisma.message.findMany({
+            where: {
+                threadId: input.messageId,
+            },
+            orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+        });
+
+        const parent = {
+            ...parentRow,
+        }
+
+        const messages = replies.map((r) => (
+            {
+                ...r,
+            }
+        ));
+        return {
+            parent, 
+            messages,
+        }
+        
     });
