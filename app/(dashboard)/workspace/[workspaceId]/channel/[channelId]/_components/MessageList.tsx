@@ -27,7 +27,7 @@ export function MessageList() {
     const bottomRef = useRef<HTMLDivElement | null>(null);
     const [isAtBottom, setIsAtBottom] = useState(false);
     const lastItemIdRef = useRef<string | undefined>(undefined);
-    
+
     // getting data on client side (UPDATE : SEE NEW CODE FOR INFINTE SCROLL/PAGINATION)
     // const { data } = useQuery(orpc.message.list.queryOptions({
     //     input: {
@@ -48,20 +48,20 @@ export function MessageList() {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
         // select is used for showing in reverse order,
         select: (data) => ({
-            pages: [...data.pages].map((p) => ({...p, items: [...p.items].reverse()})).reverse(),
+            pages: [...data.pages].map((p) => ({ ...p, items: [...p.items].reverse() })).reverse(),
             pageParams: [...data.pageParams].reverse(),
         }),
     });
 
     // Actual Query function
-    const {data, fetchNextPage, isFetchingNextPage, isLoading, error, hasNextPage, isFetching} = useInfiniteQuery({
+    const { data, fetchNextPage, isFetchingNextPage, isLoading, error, hasNextPage, isFetching } = useInfiniteQuery({
         ...infinteOptions,
         staleTime: 30_000,
         refetchOnWindowFocus: false,
     });
 
     //to get user but more specific reason to get user is to fetch user id so we can sent it forward so that we can use it to match current-user-id in MessageItem.tsx (specifically for EditMessage.tsx) so that user can edit only its own messsages and not sombody else.
-    const {data: {user} } = useSuspenseQuery(orpc.workspace.list.queryOptions());
+    const { data: { user } } = useSuspenseQuery(orpc.workspace.list.queryOptions());
 
     // To implement when page load start at bottom, then scroll up, so to alter the standard behaviour of web browser.
     useEffect(() => {
@@ -77,7 +77,6 @@ export function MessageList() {
     }, [hasInitialScrolled, data?.pages.length]);
 
     //keep view pinned to bottom on late content growth ex new messages with images.
-
     useEffect(() => {
         const el = scrollRef.current;
         if (!el) {
@@ -85,10 +84,10 @@ export function MessageList() {
         }
         const scrollToBottomIfNeeded = () => {
             if (isAtBottom || !hasInitialScrolled) {
-            requestAnimationFrame(() => {
-                bottomRef.current?.scrollIntoView({ block: "end" });
-            });
-        }
+                requestAnimationFrame(() => {
+                    bottomRef.current?.scrollIntoView({ block: "end" });
+                });
+            }
         }
         const onImageLoad = (e: Event) => {
             if (e.target instanceof HTMLImageElement) {
@@ -100,7 +99,7 @@ export function MessageList() {
         // ResizeObserver watches for size changes in the container
         const resizeObserver = new ResizeObserver(() => {
             scrollToBottomIfNeeded();
-        }); 
+        });
         resizeObserver.observe(el);
 
         //MutationObserver watches for DOM changes e.g images,loading, content, updates.
@@ -123,7 +122,7 @@ export function MessageList() {
     }, [isAtBottom, hasInitialScrolled]);
 
     const isNearBottom = (el: HTMLDivElement) => el.scrollHeight - el.scrollTop - el.clientHeight <= 80;
-    
+
     const handleScroll = () => {
         const el = scrollRef.current
         if (!el) return;
@@ -157,7 +156,7 @@ export function MessageList() {
                 requestAnimationFrame(() => {
                     el.scrollTop = el.scrollHeight;
                 });
-                
+
                 setIsAtBottom(true);
             }
         }
@@ -167,7 +166,7 @@ export function MessageList() {
     const scrollToBottom = () => {
         const el = scrollRef.current;
         if (!el) return;
-        bottomRef.current?.scrollIntoView({ block: "end" });
+        bottomRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
         setIsAtBottom(true);
     }
 
@@ -175,15 +174,15 @@ export function MessageList() {
         <div className="relative h-full">
             <div className="h-full overflow-y-auto px-4 flex flex-col space-y-1" ref={scrollRef} onScroll={handleScroll}>
                 {
-                isEmpty ?
-                (<div className="flex h-full pt-4">
-                    <EmptyState title="No messages yet🙄" description="Don't wait, send the first message and start the convo📟" buttonText="Send a message" href="#" />
-                </div>)
-                :
-                (items?.map((message) => (
-                    <MessageItem key={message.id} message={message} currentUserId={ user.id } />
-                )))
-            }
+                    isEmpty ?
+                        (<div className="flex h-full pt-4">
+                            <EmptyState title="No messages yet🙄" description="Don't wait, send the first message and start the convo📟" buttonText="Send a message" href="#" />
+                        </div>)
+                        :
+                        (items?.map((message) => (
+                            <MessageItem key={message.id} message={message} currentUserId={user.id} />
+                        )))
+                }
                 <div ref={bottomRef}></div>
             </div>
 
@@ -196,7 +195,7 @@ export function MessageList() {
                     </div>
                 </div>
             )}
-            
+
             {!isAtBottom && (
                 <Button type="button" size="sm" className="absolute bottom-4 right-5 z-20 size-10 rounded-full hover:shadow-xl transition-all duration-200" onClick={scrollToBottom}>
                     <ArrowDown className="size-4" />
