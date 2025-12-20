@@ -9,6 +9,7 @@ import { MessagesSquare } from "lucide-react";
 import { useThread } from "@/providers/ThreadProvider";
 import { orpc } from "@/lib/orpc";
 import { useQueryClient } from "@tanstack/react-query";
+import { ReactionsBar } from "../reaction/ReactionsBar";
 
 
 interface iAppProps {
@@ -70,14 +71,16 @@ export function MessageItem({ message, currentUserId }: iAppProps) {
                                     <Image src={message.imageUrl} alt="Message Attachment" width={512} height={512} className="rounded-md max-h-[320px] w-auto object-contain" />
                                 </div>
                             )}
-                            {message.repliesCount > 0 && (
+                            {/* Emojis Reaction */}
+                            <ReactionsBar messageId={message.id} reactions={message.reactions} context={{ type: 'list', channelId: message.channelId! }} />
+                            {message.replyCount > 0 && (
                                 <button type="button" className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border cursor-pointer" onClick={() => openThread(message.id)}
                                     onMouseEnter={prefetchThread}
                                     onFocus={prefetchThread}
                                 >
                                     <MessagesSquare className="size-3.5" />
-                                    <span>{message.repliesCount}{" "}</span>
-                                    <span>{message.repliesCount === 1 ? "reply" : "replies"}</span>
+                                    <span>{message.replyCount}{" "}</span>
+                                    <span>{message.replyCount === 1 ? "reply" : "replies"}</span>
                                     <span className="opacity-0 group-hover:opacity-100 transition-opacity">View Thread</span>
                                 </button>
                             )}
