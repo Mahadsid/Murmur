@@ -10,6 +10,7 @@ import { SafeContent } from "@/components/rich-text-editor/SafeContent";
 import { KindeUser } from "@kinde-oss/kinde-auth-nextjs";
 import { ThreadSidebarSkeleton } from "./ThreadSidebarSkeleton";
 import { useEffect, useRef, useState } from "react";
+import { SummarizeThread } from "./SummarizeThread";
 
 // const messagesDEMO = [
 //     {
@@ -165,6 +166,7 @@ export function ThreadSidebar({ user }: ThreadSidebarProps) {
                     <span>Thread</span>
                 </div>
                 <div className="flex items-center gap-2">
+                    <SummarizeThread messageId={selectedThreadId!} />
                     <Button variant="outline" size="icon" onClick={closeThread}>
                         <X className="size-4" />
                     </Button>
