@@ -4,6 +4,8 @@ import { Toggle } from "../ui/toggle";
 import { Bold, Code, Italic, ListIcon, ListOrdered, Redo, Strikethrough, Undo } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
+import { ComposeAssistent } from "./ComposeAssistent";
+import { markdownToJson } from "@/lib/markdown-to-json";
 
 
 interface MenuBarProps {
@@ -11,7 +13,7 @@ interface MenuBarProps {
 }
 
 export function MenuBar({ editor }: MenuBarProps) {
-    
+
     const editorState = useEditorState({
         editor,
         selector: ({ editor }) => {
@@ -25,12 +27,22 @@ export function MenuBar({ editor }: MenuBarProps) {
                 isOrderedList: editor.isActive("orderedList"),
                 canUndo: editor.can().undo(),
                 canRedo: editor.can().redo(),
+                currentContent: editor.getJSON(),
             };
         },
     });
 
     if (!editor) {
         return null;
+    }
+
+    const handleAcceptImprovisedText = (markdown: string) => {
+        try {
+            const json = markdownToJson(markdown);
+            editor.commands.setContent(json);
+        } catch {
+            console.log("something went wrong");
+        }
     }
 
     return (
@@ -42,7 +54,7 @@ export function MenuBar({ editor }: MenuBarProps) {
                         <TooltipTrigger asChild>
                             <Toggle size="sm" pressed={editor.isActive("bold")} onPressedChange={() => editor.chain().focus().toggleBold().run()} className={cn(editorState?.isBold && "bg-muted text-muted-foreground")
                             }>
-                                <Bold/>
+                                <Bold />
                             </Toggle>
                         </TooltipTrigger>
                         <TooltipContent>Bold</TooltipContent>
@@ -85,14 +97,14 @@ export function MenuBar({ editor }: MenuBarProps) {
                 {/* Seperator Line */}
                 <div className="w-px h-6 bg-border mx-2"></div>
 
-                            {/* LIST SECTION */}
+                {/* LIST SECTION */}
                 <div className="flex flex-wrap gap-1">
                     {/* bullet list */}
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Toggle size="sm" pressed={editor.isActive("bulletList")} onPressedChange={() => editor.chain().focus().toggleBulletList().run()} className={cn(editorState?.isBulletList && "bg-muted text-muted-foreground")
                             }>
-                                <ListIcon/>
+                                <ListIcon />
                             </Toggle>
                         </TooltipTrigger>
                         <TooltipContent>Bullet List</TooltipContent>
@@ -112,7 +124,7 @@ export function MenuBar({ editor }: MenuBarProps) {
                 {/* Seperator Line */}
                 <div className="w-px h-6 bg-border mx-2"></div>
 
-                                {/* undo-redo SECTION */}
+                {/* undo-redo SECTION */}
                 <div className="flex flex-wrap gap-1">
                     {/* undo list */}
                     <Tooltip>
@@ -134,7 +146,10 @@ export function MenuBar({ editor }: MenuBarProps) {
                         <TooltipContent>Redo</TooltipContent>
                     </Tooltip>
                 </div>
-
+                <div className="w-px h-6 bg-border mx-2"></div>
+                <div className="flex flex-wrap gap-1">
+                    <ComposeAssistent content={JSON.stringify(editorState?.currentContent)} onAccept={handleAcceptImprovisedText} />
+                </div>
             </TooltipProvider>
         </div>
     )

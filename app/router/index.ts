@@ -3,7 +3,7 @@
 // This guide covers the basics: defining procedures(OR SERVER CALLS LIKE WE DID IN LEARNOVA), handling errors, and integrating with popular frameworks.
 
 
-import { generateThreadSummary } from "./ai";
+import { generateCompose, generateThreadSummary } from "./ai";
 import { createChannel, getChannel, listChannels } from "./channel";
 import { inviteMember, listMembers } from "./member";
 import { createMessage, listMessages, listThreadReplies, toggleReaction, updateMessage } from "./message";
@@ -42,9 +42,9 @@ export const router = {
     }
   },
   ai: {
-    // compose: {
-    //   generate:
-    // },
+    compose: {
+      generate: generateCompose,
+    },
     thread: {
       summary: {
         generate: generateThreadSummary,

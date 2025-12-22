@@ -1,6 +1,6 @@
 // Standard arcjet security, like shield, bot protection.
 
-import arcjet, { detectBot, shield } from "@/lib/arcjet"
+import arcjet, { detectBot, sensitiveInfo, shield } from "@/lib/arcjet"
 import { base } from "../base";
 import { KindeUser } from "@kinde-oss/kinde-auth-nextjs";
 
@@ -16,6 +16,11 @@ const buildStandardAj = () =>
             mode: "LIVE",
             allow: ['CATEGORY:SEARCH_ENGINE', 'CATEGORY:PREVIEW', 'CATEGORY:MONITOR'],
         })
+    ).withRule(
+            sensitiveInfo({
+                mode: "LIVE",
+                deny: ["PHONE_NUMBER", "CREDIT_CARD_NUMBER", "EMAIL", "IP_ADDRESS"]
+            })
     );
 
 export const standardSecurityMiddleware = base.$context<{
@@ -27,6 +32,11 @@ export const standardSecurityMiddleware = base.$context<{
     });
 
     if (decision.isDenied()) {
+        if (decision.reason.isSensitiveInfo()) {
+            throw errors.BAD_REQUEST({
+                message: 'Sensitive information detected. Please remove PII (eg. credit card, phone number, email, IP address.'
+            });
+        }
         if (decision.reason.isBot()) {
             throw errors.FORBIDDEN({
                 message: 'Automated/Bot traffic blocked.'
