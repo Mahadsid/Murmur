@@ -159,6 +159,11 @@ export const HeroHeader = () => {
                                                     size: "sm",
                                                     className: cn(isScrolled && "lg:hidden"),
                                                 })}
+                                                authUrlParams={{
+                                                    is_create_org: 'true',
+                                                    org_name: 'My Workspace',
+                                                    pricing_table_key: 'organization_plans',
+                                                }}
                                             >
                                                 Sign-Up
                                             </RegisterLink>
@@ -174,13 +179,19 @@ export const HeroHeader = () => {
                                             <div className={cn(isScrolled ? "lg:inline-flex" : "hidden")}>
                                                 <RegisterLink className={buttonVariants({
                                                     size: 'sm'
-                                                })}>
+                                                })}
+                                                    authUrlParams={{
+                                                        is_create_org: 'true',
+                                                        org_name: 'My Workspace',
+                                                        pricing_table_key: 'organization_plans',
+                                                    }}
+                                                >
                                                     Join Now!
                                                 </RegisterLink>
                                             </div>
                                         </>
                                     )}
-                                    
+
                                 </div>
                             )}
                         </div>
