@@ -37,14 +37,24 @@ export function ReactionsBar({ messageId, reactions, context }: ReactionBarProps
             onMutate: async (vars: { messageId: string; emoji: string }) => {
 
                 //helper function for mutating logic
-                const bump = (rxns: GroupedReactionSchemaType[]) => {
+                const bump = (rxns: GroupedReactionSchemaType[] = []) => {
                     const found = rxns.find((r) => r.emoji === vars.emoji);
 
-                    if (found) {
+                    // CASE 1: Emoji exists & I already reacted → remove my reaction
+                    if (found && found.reactedByMe) {
                         const dec = found.count - 1
                         return dec <= 0 ? rxns.filter((r) => r.emoji !== found.emoji) : rxns.map((r) => r.emoji === found.emoji ? { ...r, count: dec, reactedByMe: false } : r
                         );
                     }
+                    // CASE 2: Emoji exists but I have NOT reacted → add my reaction
+                    if (found && !found.reactedByMe) {
+                        return rxns.map((r) =>
+                            r.emoji === vars.emoji
+                                ? { ...r, count: r.count + 1, reactedByMe: true }
+                                : r
+                        );
+                    }
+                    // CASE 3: Emoji does not exist → add new reaction
                     return [...rxns, { emoji: vars.emoji, count: 1, reactedByMe: true }];
                 }
 

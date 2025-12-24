@@ -35,13 +35,18 @@ export function ChannelRealtimeProvider({ channelId, children }: ChannelRealtime
                 const event = result.data
                 if (event.type === 'message:created') {
                     const raw = event.payload.message
+                    const normalized = {
+                        ...raw,
+                        reactions: raw.reactions ?? [],
+                        replyCount: raw.replyCount ?? 0,
+                    }
                     //Insert at the top of first page of infinite list for the channel
                     queryClient.setQueryData<InfiniteMessages>(["message.list", channelId], (old) => {
                         if (!old) {
                             return {
                                 pages: [
                                     {
-                                        items: [raw],
+                                        items: [normalized],
                                         nextCursor: undefined
                                     },
                                 ],
@@ -82,7 +87,7 @@ export function ChannelRealtimeProvider({ channelId, children }: ChannelRealtime
                 }
 
                 if (event.type === 'reaction:updated') {
-                    const { messageId, reactions } = event.payload
+                    const { messageId, reactions: incoming } = event.payload
 
                     queryClient.setQueryData<InfiniteMessages>(
                         ["message.list", channelId],
@@ -92,7 +97,21 @@ export function ChannelRealtimeProvider({ channelId, children }: ChannelRealtime
                             }
                             const pages = old.pages.map((p) => ({
                                 ...p,
-                                items: p.items.map((m) => m.id === messageId ? { ...m, reactions } : m)
+                                items: p.items.map((m) => {
+                                    if (m.id !== messageId) {
+                                        return m;
+                                    }
+                                    const existing = m.reactions ?? [];
+                                    // MERGE instead of replace
+                                    const merged = incoming.map((r) => {
+                                        const local = existing.find((e) => e.emoji === r.emoji);
+                                        return {
+                                            ...r,
+                                            reactedByMe: local?.reactedByMe ?? false,
+                                        }
+                                    })
+                                    return { ...m, reactions: merged };
+                                }),
                             }));
 
                             return { ...old, pages };
