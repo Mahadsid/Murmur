@@ -62,7 +62,6 @@ export function WorkspaceMembersList() {
                         </Avatar>
                         {/* ONline/OFFline status */}
                         <div className={cn("absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-background", member.id && onlineUserIds.has(member.id) ? "bg-green-500" : "bg-gray-400")}>
-
                         </div>
                     </div>
                     <div className="flex-1 min-w-0">

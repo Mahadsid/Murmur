@@ -8,12 +8,12 @@ import { MessageComposer } from "./MessageComposer"
 import { InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query";
 import { orpc } from "@/lib/orpc";
 import { toast } from "sonner";
-import {  useState } from "react";
+import { useState } from "react";
 import { useAttachmentUpload } from "@/hooks/use-attachment-upload";
 import { Message } from "@/lib/generated/prisma/client";
 import { KindeUser } from "@kinde-oss/kinde-auth-nextjs";
 import { getAvatar } from "@/lib/get-avatar";
-import { onSuccess } from "@orpc/client";
+import { useChannelRealtime } from "@/providers/ChannelRealtimeProvider";
 
 
 interface iAppProps {
@@ -25,13 +25,14 @@ type MessagePage = { items: Message[]; nextCursor?: string; }
 type InfiniteMessages = InfiniteData<MessagePage>;
 
 export function MessageInputForm({ channelId, user }: iAppProps) {
-    
+
     // TO revalidate again and render new message after creation we need to revalidate query
     const queryClient = useQueryClient();
     //for resetting form
     const [editorKey, setEditorKey] = useState(0);
     // attach file modal closing and opening state.
     const upload = useAttachmentUpload();
+    const { send } = useChannelRealtime();
 
     const form = useForm({
         resolver: zodResolver(createMessageSchema),
@@ -134,6 +135,8 @@ export function MessageInputForm({ channelId, user }: iAppProps) {
                 upload.clear(); //if user attach some image attachment then after sending that message attachmentchip preview should get cleared
                 setEditorKey((k) => k + 1);
 
+                send({ type: "message:created", payload: { message: data } });
+
                 return toast.success("Message created successfully")
             },
 
@@ -169,7 +172,7 @@ export function MessageInputForm({ channelId, user }: iAppProps) {
                         <FormItem>
                             <FormControl>
                                 <MessageComposer key={editorKey} value={field.value} onChange={field.onChange} onSubmit={() => onSubmit(form.getValues())} isSubmitting={createMessageMutation.isPending}
-                                upload={upload}
+                                    upload={upload}
                                 />
                             </FormControl>
                             <FormMessage />
