@@ -4,10 +4,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { orpc } from "@/lib/orpc";
 import { useQuery } from "@tanstack/react-query";
 import { Search, Users } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { MemberItem } from "./MemberItem";
 import { m } from "motion/react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePresence } from "@/hooks/use-presence";
+import { useParams } from "next/navigation";
+import { User } from "@/app/schemas/realtime";
 
 
 export function MemberOverview() {
@@ -18,10 +21,8 @@ export function MemberOverview() {
 
     //to fetch the members from workspace, from listMembers backend route in member.ts use useQuery() from tanstack for api call/
     const { data, isLoading, error } = useQuery(orpc.workspace.member.list.queryOptions());
-    //simple defence
-    if (error) {
-        return <h1>Error: { error.message }</h1>
-    }
+    //simple defence : moved to last
+
 
     //for searching functionality of memberoverviewbox
     const members = data ?? [];
@@ -37,6 +38,34 @@ export function MemberOverview() {
         :
         members;
 
+    const { data: workspaceData } = useQuery(orpc.workspace.list.queryOptions())
+
+    const currentUser = useMemo(() => {
+        if (!workspaceData?.user) {
+            return null;
+        }
+        return {
+            id: workspaceData.user.id,
+            full_name: workspaceData.user.given_name,
+            email: workspaceData.user.email,
+            picture: workspaceData.user.picture,
+        } satisfies User;
+    }, [workspaceData?.user])
+
+    const params = useParams();
+    const workspaceId = params.workspaceId
+
+    const { onlineUsers } = usePresence({
+        room: `worspace-${workspaceId}`,
+        currentUser: currentUser,
+    });
+    const onlineUserIds = useMemo(
+        () => new Set(onlineUsers.map((u) => u.id)), [onlineUsers]
+    );
+
+    if (error) {
+        return <h1>Error: {error.message}</h1>
+    }
     return (
         <Popover open={open} onOpenChange={setOpen} >
             <PopoverTrigger asChild>
@@ -75,8 +104,8 @@ export function MemberOverview() {
                                     <div key={i} className="flex items-center gap-3 px-4 py-2 ">
                                         <Skeleton className="size-8 rounded-full" />
                                         <div className="flex-1 space-y-1">
-                                            <Skeleton className="h-3 w-32"/>
-                                            <Skeleton className="h-3 w-20"/>
+                                            <Skeleton className="h-3 w-32" />
+                                            <Skeleton className="h-3 w-20" />
                                         </div>
                                     </div>
                                 )))
@@ -86,7 +115,7 @@ export function MemberOverview() {
                                     (<p className="px-4 py-6 text-sm text-muted-foreground">No members found.</p>)
                                     :
                                     filteredMembers.map((member) => (
-                                        <MemberItem member={member} key={member.id} />
+                                        <MemberItem member={member} key={member.id} isOnline={member.id ? onlineUserIds.has(member.id) : false} />
                                     ))
 
                         }

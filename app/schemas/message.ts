@@ -27,6 +27,6 @@ export type toggleReactionSchemaType = z.infer<typeof updateMessageSchema>;
 export const GroupedReactionSchema = z.object({
     emoji: z.string(),
     count: z.number(),
-    reactedByMe: z.boolean()
+    reactedByMe: z.boolean(),
 })
 export type GroupedReactionSchemaType = z.infer<typeof GroupedReactionSchema>;
