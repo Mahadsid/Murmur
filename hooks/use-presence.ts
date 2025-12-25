@@ -13,7 +13,7 @@ export function usePresence({room, currentUser}: usePresenceProps) {
     const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
 
     const socket = usePartySocket({
-        host: "http://127.0.0.1:8787",
+        host: "https://murmur-realtime.muhammadmahad6.workers.dev",
         room: room,
         party: "chat",
         onOpen() {

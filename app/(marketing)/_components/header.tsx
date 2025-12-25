@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import React from "react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "../../../components/ui/theme-toggle";
@@ -11,14 +11,15 @@ import {
     RegisterLink,
     LoginLink,
     LogoutLink,
+    PortalLink,
 } from "@kinde-oss/kinde-auth-nextjs/components";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 
 const menuItems = [
-    { name: "Features", href: "#link" },
-    { name: "Solution", href: "#link" },
+    { name: "About", href: "https://mahadsid.github.io/portfolio/#" },
+    { name: "Features", href: "https://mahadsid.github.io/portfolio/#" },
     { name: "Pricing", href: "#link" },
-    { name: "About", href: "#link" },
+    { name: "Github", href: "https://github.com/Mahadsid/Murmur" },
 ];
 
 export const HeroHeader = () => {
@@ -74,7 +75,7 @@ export const HeroHeader = () => {
 
                         <div className="absolute inset-0 m-auto hidden size-fit lg:block">
                             <ul className="flex gap-8 text-sm">
-                                {menuItems.map((item, index) => (
+                                {/* {menuItems.map((item, index) => (
                                     <li key={index}>
                                         <Link
                                             href={item.href}
@@ -83,7 +84,45 @@ export const HeroHeader = () => {
                                             <span>{item.name}</span>
                                         </Link>
                                     </li>
-                                ))}
+                                ))} */}
+                                {menuItems.map((item, index) => {
+                                    if (item.name !== "Pricing") {
+                                        return (
+                                            <li key={index}>
+                                                <Link
+                                                    href={item.href}
+                                                    className="text-muted-foreground hover:text-accent-foreground block duration-150"
+                                                    target="_blank"
+                                                >
+                                                    {item.name}
+                                                </Link>
+                                            </li>
+                                        );
+                                    }
+                                    return (
+                                        <li key={index}>
+                                            {!user ? (
+                                                <RegisterLink
+                                                    authUrlParams={{
+                                                        is_create_org: 'true',
+                                                        org_name: 'My Workspace',
+                                                        pricing_table_key: 'organization_plans',
+                                                    }}
+                                                    className="text-muted-foreground hover:text-accent-foreground block duration-150"
+                                                >
+                                                    Pricing
+                                                </RegisterLink>
+                                            ) : (
+                                                <PortalLink
+                                                >
+                                                    <span className="text-muted-foreground group-hover:text-accent-foreground duration-150">
+                                                        Pricing
+                                                    </span>
+                                                </PortalLink>
+                                            )}
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </div>
 
