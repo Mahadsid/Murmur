@@ -16,6 +16,7 @@ import { getAvatar } from "@/lib/get-avatar";
 
 import { MessageListItem } from "@/lib/types";
 import { useChannelRealtime } from "@/providers/ChannelRealtimeProvider";
+import { useThreadRealtime } from "@/providers/ThreadRealtimeProvider";
 
 interface ThreadReplyFormProps {
     threadId: string;
@@ -32,6 +33,7 @@ export function ThreadReplyForm({ threadId, user }: ThreadReplyFormProps) {
 
     const queryClient = useQueryClient();
     const { send } = useChannelRealtime();
+    const { send: sendThread } = useThreadRealtime();
 
     const form = useForm({
         resolver: zodResolver(createMessageSchema),
@@ -119,7 +121,7 @@ export function ThreadReplyForm({ threadId, user }: ThreadReplyFormProps) {
                 }
             },
 
-            onSuccess: (_data, _vars, ctx) => {
+            onSuccess: (data, _vars, ctx) => {
                 //IT IS IMPORTANT to keep sync the client state with server state
                 queryClient.invalidateQueries({ queryKey: ctx.listOptions.queryKey });
 
@@ -127,6 +129,8 @@ export function ThreadReplyForm({ threadId, user }: ThreadReplyFormProps) {
                 form.reset({ channelId, content: "", threadId })
                 upload.clear()
                 setEditorKey((k) => k + 1);
+
+                sendThread({ type: "thread:reply:created", payload: { reply: data } })
 
                 send({ type: 'message:replies:increment', payload: { messageId: threadId, delta: 1 } })
 
