@@ -20,7 +20,7 @@ export function ThreadRealtimeProvider({ threadId, children }: ThreadRealtimePro
     type ThreadQueryData = Awaited<ReturnType<ThreadListOptions["queryFn"]>>;
 
     const socket = usePartySocket({
-        host: "http://127.0.0.1:8787",
+        host: "https://murmur-realtime.muhammadmahad6.workers.dev",
         room: `thread-${threadId}`,
         party: "chat",
 

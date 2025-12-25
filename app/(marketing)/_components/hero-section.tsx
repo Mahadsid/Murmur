@@ -1,15 +1,13 @@
-import React from 'react'
 import Link from 'next/link'
 import { ArrowRight, ChevronRight, Github } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import Image from 'next/image'
 import { TextEffect } from '@/components/ui/text-effect'
 import { AnimatedGroup } from '@/components/ui/animated-group'
 import { HeroHeader } from './header'
 import BackgroundImage from '@/public/background4.jpg'
-import SS1 from '@/public/ss1.png'
-import Learnova from '@/public/Learnova-1.jpeg'
-import SS2 from '@/public/ss2.png'
+import darkbackImg from '@/public/darkback.png'
+import whitebackImg from '@/public/whiteback.png';
 import Arcjet from '@/public/companies/Arcjet.png'
 import Kinde from '@/public/companies/kinde.png'
 import Motion from '@/public/companies/motion.png'
@@ -17,6 +15,8 @@ import Neon from '@/public/companies/neon.png'
 import Orpc from '@/public/companies/orpc.png'
 import Prsima from '@/public/companies/prisma.svg'
 import Vercel from '@/public/companies/vercel.svg'
+import { RegisterLink } from '@kinde-oss/kinde-auth-nextjs/components'
+
 
 const transitionVariants = {
     item: {
@@ -96,7 +96,7 @@ export default function HeroSection() {
                             <div className="text-center sm:mx-auto lg:mr-auto lg:mt-0">
                                 <AnimatedGroup variants={transitionVariants}>
                                     <Link
-                                        href="#link"
+                                        href="#"
                                         className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-zinc-950/5 transition-colors duration-300 dark:border-t-white/5 dark:shadow-zinc-950">
                                         <span className="text-foreground text-sm">Smart Team Messaging — Fueled by AI</span>
                                         <span className="dark:border-background block h-4 w-0.5 border-l bg-white dark:bg-zinc-700"></span>
@@ -147,14 +147,31 @@ export default function HeroSection() {
                                     <div
                                         key={1}
                                         className="bg-foreground/10 rounded-[calc(var(--radius-xl)+0.125rem)] border p-0.5">
-                                        <Button
+                                        {/* <Button
                                             asChild
                                             size="lg"
                                             className="rounded-xl px-5 text-base">
-                                            <Link href="#link">
-                                                <span className="text-nowrap">Sign-Up Today!</span>
+                                            <Link href="#">
+                                                <span className="text-nowrap">
+                                                    Sign-Up Today!
+                                                </span>
                                             </Link>
-                                        </Button>
+                                        </Button> */}
+                                        <RegisterLink
+                                            className={buttonVariants({
+                                                size: "lg",
+                                                className: "rounded-xl px-5 text-base",
+                                            })}
+                                            authUrlParams={{
+                                                is_create_org: 'true',
+                                                org_name: 'My Workspace',
+                                                pricing_table_key: 'organization_plans',
+                                            }}
+                                        >
+                                            <span className="text-nowrap font-semibold">
+                                                Sign-Up Today!
+                                            </span>
+                                        </RegisterLink>
                                     </div>
                                     <Button
                                         key={2}
@@ -162,7 +179,7 @@ export default function HeroSection() {
                                         size="lg"
                                         variant="ghost"
                                         className="h-10.5 rounded-xl px-5">
-                                        <Link href="#link">
+                                        <Link href="#">
                                             <span className="text-nowrap">Explore More</span>
                                         </Link>
                                     </Button>
@@ -186,14 +203,14 @@ export default function HeroSection() {
                                 <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg shadow-zinc-950/15 ring-1">
                                     <Image
                                         className="bg-background aspect-15/8 relative hidden rounded-2xl dark:block object-contain object-top"
-                                        src={Learnova}
+                                        src={darkbackImg}
                                         alt="app screen"
                                         width="2700"
                                         height="1440"
                                     />
                                     <Image
                                         className="z-2 border-border/25 aspect-15/8 relative rounded-2xl border dark:hidden object-contain object-top"
-                                        src={SS2}
+                                        src={whitebackImg}
                                         alt="app screen"
                                         width="2700"
                                         height="1440"
