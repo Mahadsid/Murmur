@@ -10,7 +10,7 @@ import darkbackImg from '@/public/darkback.png'
 import whitebackImg from '@/public/whiteback.png';
 import Arcjet from '@/public/companies/Arcjet.png'
 import Kinde from '@/public/companies/kinde.png'
-import Motion from '@/public/companies/motion.png'
+import Cloudflare from '@/public/companies/Cloudflare2.png'
 import Neon from '@/public/companies/neon.png'
 import Orpc from '@/public/companies/orpc.png'
 import Prsima from '@/public/companies/prisma.svg'
@@ -270,9 +270,9 @@ export default function HeroSection() {
                             </div>
                             <div className="flex">
                                 <Image
-                                    className="mx-auto h-7 w-fit invert dark:invert-0"
-                                    src={Motion}
-                                    alt="Motion Logo"
+                                    className="mx-auto h-7 w-fit object-contain invert dark:invert-0"
+                                    src={Cloudflare}
+                                    alt="Cloudflare Logo"
                                 />
                             </div>
                             <div className="flex">
