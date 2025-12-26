@@ -1,5 +1,7 @@
 // middleware so that after login user gets redirected to corrected route
 
+/* eslint-disable */
+
 import arcjet, { createMiddleware, detectBot } from "@arcjet/next";
 import { withAuth } from "@kinde-oss/kinde-auth-nextjs/server";
 import { NextMiddleware, NextRequest, NextResponse } from "next/server";

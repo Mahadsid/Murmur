@@ -6,7 +6,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Search, Users } from "lucide-react";
 import { useMemo, useState } from "react";
 import { MemberItem } from "./MemberItem";
-import { m } from "motion/react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePresence } from "@/hooks/use-presence";
 import { useParams } from "next/navigation";

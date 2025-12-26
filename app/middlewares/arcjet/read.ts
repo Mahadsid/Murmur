@@ -1,6 +1,6 @@
 // standard read operations which is like reading messaging so to protect that we use rate limiting 180 req per min.
 
-import arcjet, { detectBot, shield, slidingWindow } from "@/lib/arcjet"
+import arcjet, { slidingWindow } from "@/lib/arcjet"
 import { base } from "../base";
 import { KindeUser } from "@kinde-oss/kinde-auth-nextjs";
 

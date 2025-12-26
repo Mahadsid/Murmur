@@ -6,7 +6,7 @@ import { base } from "../middlewares/base";
 import { requiredAuthMiddleware } from "../middlewares/auth";
 import { requiredWorkspaceMiddleware } from "../middlewares/workspace";
 import { workspaceSchema } from "../schemas/workspace";
-import { Organizations, Users, init } from "@kinde/management-api-js";
+import { Organizations, init } from "@kinde/management-api-js";
 import { standardSecurityMiddleware } from "../middlewares/arcjet/standard";
 import { heavyWriteSecurityMiddleware } from "../middlewares/arcjet/heavy-write";
 

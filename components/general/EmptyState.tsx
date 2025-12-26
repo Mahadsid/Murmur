@@ -1,4 +1,4 @@
-import { Cloud, MessageSquareOff, PlusIcon, Send } from "lucide-react";
+import { Cloud, MessageSquareOff } from "lucide-react";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "../ui/empty";
 import Link from "next/link";
 import { buttonVariants } from "../ui/button";
@@ -9,19 +9,19 @@ interface EmptyStateProps {
     buttonText: string;
     href: string;
 }
-export function EmptyState({buttonText, description, href, title}: EmptyStateProps) {
+export function EmptyState({ buttonText, description, href, title }: EmptyStateProps) {
     return (
         <Empty className="border border-dashed">
             <EmptyHeader>
                 <EmptyMedia variant="icon" className="bg-primary/10">
-                    <Cloud className="size-5 text-primary"/>
+                    <Cloud className="size-5 text-primary" />
                 </EmptyMedia>
                 <EmptyTitle>
                     {title}
                 </EmptyTitle>
                 <EmptyDescription>
                     {description}
-                </EmptyDescription>  
+                </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
                 <Link href={href} className={buttonVariants()}>
