@@ -3,6 +3,7 @@
 import aj, { detectBot, sensitiveInfo, shield, slidingWindow } from '@/lib/arcjet';
 import { base } from '../base';
 import { KindeUser } from '@kinde-oss/kinde-auth-nextjs/types';
+import { ArcjetNextRequest } from '@arcjet/next';
 
 const buildAiAj = () => 
     aj.withRule(
@@ -32,7 +33,7 @@ const buildAiAj = () =>
 
 
 export const aiSecurityMiddleware = base.$context<{
-    request: Request;
+    request: Request | ArcjetNextRequest;
     user: KindeUser<Record<string, unknown>>;
 }>().middleware(async ({ context, next, errors }) => {
     const decision = await buildAiAj().protect(context.request, {
