@@ -29,7 +29,7 @@ export default function InviteMember() {
     const inviteMutation = useMutation(
         orpc.workspace.member.invite.mutationOptions({
             onSuccess: () => {
-                toast.success("Invitation sent successfully");
+                toast.success("Member added successfully");
                 form.reset();
                 setOpen(false);
             },
@@ -49,14 +49,14 @@ export default function InviteMember() {
             <DialogTrigger asChild>
                 <Button variant="outline">
                     <UserPlus />
-                    Invite Member
+                    Add Member
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>Invite Member</DialogTitle>
                     <DialogDescription>
-                        Invite members to join your awesome workspace
+                        Add your members to  your awesome workspace
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -64,7 +64,7 @@ export default function InviteMember() {
                         <FormField
                             control={form.control}
                             name="name"
-                            render={({field}) => (
+                            render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Name</FormLabel>
                                     <FormControl>
@@ -77,7 +77,7 @@ export default function InviteMember() {
                         <FormField
                             control={form.control}
                             name="email"
-                            render={({field}) => (
+                            render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Email</FormLabel>
                                     <FormControl>
@@ -87,7 +87,7 @@ export default function InviteMember() {
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit">Send Invitation</Button>
+                        <Button type="submit">Onboard Member</Button>
                     </form>
                 </Form>
             </DialogContent>
