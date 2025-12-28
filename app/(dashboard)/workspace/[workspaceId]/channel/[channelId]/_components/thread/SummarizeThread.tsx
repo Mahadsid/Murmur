@@ -97,7 +97,9 @@ export function SummarizeThread({ messageId }: SummarizeThreadProps) {
                         </div>
                     ) : summaryText ? (
                         // <p>{summaryText}</p>
-                        <div className="prose text-white font-medium text-sm">
+                        <div className="prose prose-sm font-medium
+                prose-neutral
+                dark:prose-invert">
                             <ReactMarkdown>
                                 {summaryText}
                             </ReactMarkdown>
