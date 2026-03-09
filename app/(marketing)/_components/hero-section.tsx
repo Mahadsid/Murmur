@@ -15,6 +15,7 @@ import Neon from '@/public/companies/neon.png'
 import Orpc from '@/public/companies/orpc.png'
 import Prsima from '@/public/companies/prisma.svg'
 import Vercel from '@/public/companies/vercel.svg'
+import Github from '@/public/companies/Github.png'
 import { RegisterLink } from '@kinde-oss/kinde-auth-nextjs/components'
 
 
@@ -284,12 +285,10 @@ export default function HeroSection() {
                             </div>
 
                             <div className="flex">
-                                <img
-                                    className="mx-auto h-6 w-fit dark:invert"
-                                    src="https://html.tailus.io/blocks/customers/github.svg"
-                                    alt="OpenAI Logo"
-                                    height="24"
-                                    width="auto"
+                                <Image
+                                    className="mx-auto h-7 w-fit dark:invert"
+                                    src={Github}
+                                    alt="Github Logo"
                                 />
                             </div>
                         </div>
