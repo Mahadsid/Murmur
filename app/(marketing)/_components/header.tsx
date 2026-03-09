@@ -16,8 +16,8 @@ import {
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 
 const menuItems = [
-    { name: "About", href: "https://mahadsid.github.io/portfolio/projects/Murmur1.html" },
-    { name: "Features", href: "https://mahadsid.github.io/portfolio/projects/Murmur1.html" },
+    { name: "About", href: "https://portfolio-2026-theta-eosin.vercel.app/projects/0" },
+    { name: "Features", href: "https://portfolio-2026-theta-eosin.vercel.app/projects/0" },
     { name: "Pricing", href: "#link" },
     { name: "Github", href: "https://github.com/Mahadsid/Murmur" },
 ];
